@@ -18,7 +18,7 @@ uv tool install git+https://github.com/LucaDeLeo/gquill.git
 gquill auth
 ```
 
-This opens a browser for Google OAuth and saves a token to `~/.gdoc/token.json`. All docs are created under whichever Google account you sign in with. To switch accounts, run `gquill auth` again.
+This opens a browser for Google OAuth and saves a token to `~/.config/gdoc/token.json`. All docs are created under whichever Google account you sign in with. To switch accounts, run `gquill auth` again.
 
 ### Parakeet Model
 

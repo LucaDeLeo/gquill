@@ -117,9 +117,14 @@ def _run_auth():
 
 
 def main():
-    # Handle `gquill auth` before argparse
+    # Handle subcommands before argparse
     if len(sys.argv) >= 2 and sys.argv[1] == "auth":
         _run_auth()
+        return
+
+    if len(sys.argv) >= 2 and sys.argv[1] == "update":
+        from gquill.update import run_update
+        run_update()
         return
 
     parser = argparse.ArgumentParser(
@@ -133,7 +138,14 @@ Examples:
   gquill --doc DOC_ID        Append to existing doc
   gquill --no-sync           Local-only (same as livekeet)
   gquill --mic-only          Microphone only (no system audio)
+  gquill update              Update to latest version
         """,
+    )
+
+    from gquill.update import _installed_version
+    parser.add_argument(
+        "--version", action="version",
+        version=f"gquill {_installed_version()}",
     )
 
     # livekeet-compatible flags
@@ -194,6 +206,10 @@ Examples:
     )
 
     args = parser.parse_args()
+
+    # Check for updates
+    from gquill.update import check_for_update
+    check_for_update()
 
     # Load livekeet config
     config = load_config()
