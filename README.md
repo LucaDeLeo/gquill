@@ -1,12 +1,13 @@
 # gquill
 
-Real-time meeting transcription synced to Google Docs. Powered by [livekeet](https://github.com/LucaDeLeo/livekeet) (on-device transcription via NVIDIA Parakeet on Apple Silicon) and [gdoc](https://github.com/LucaDeLeo/gdoc) (Google Docs API).
+Real-time meeting transcription synced to Google Docs. Powered by [livekeet](https://github.com/LucaDeLeo/livekeet) (on-device transcription via NVIDIA Parakeet on Apple Silicon) and [gdoc](https://github.com/LucaDeLeo/gdoc) (CLI for Google Docs).
 
 Each line of transcript appears in a Google Doc within seconds of being spoken. The local markdown file is always the source of truth — Google sync is best-effort and never blocks transcription.
 
 ## Install
 
 ```
+uv tool install git+https://github.com/LucaDeLeo/gdoc.git
 uv tool install git+https://github.com/LucaDeLeo/gquill.git
 ```
 
@@ -18,7 +19,7 @@ uv tool install git+https://github.com/LucaDeLeo/gquill.git
 gdoc auth
 ```
 
-This opens a browser for Google OAuth. The token is saved to `~/.gdoc/token.json`. All docs are created under whichever Google account you sign in with. To switch accounts, run `gdoc auth` again.
+This requires the [gdoc](https://github.com/LucaDeLeo/gdoc) CLI (installed above). It opens a browser for Google OAuth and saves a token to `~/.gdoc/token.json`. All docs are created under whichever Google account you sign in with. To switch accounts, run `gdoc auth` again.
 
 ### Parakeet Model
 
