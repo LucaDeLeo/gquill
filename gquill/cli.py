@@ -30,7 +30,7 @@ def _setup_doc(args, config) -> tuple[str | None, str | None, int]:
     try:
         get_credentials()
     except AuthError:
-        print("Error: Not authenticated with Google. Run `gdoc auth` first.")
+        print("Error: Not authenticated with Google. Run `gquill auth` first.")
         print("Or use --no-sync for local-only transcription.")
         sys.exit(1)
 
@@ -104,16 +104,34 @@ def _setup_doc(args, config) -> tuple[str | None, str | None, int]:
     return doc_id, url, end_index
 
 
+def _run_auth():
+    """Run the Google OAuth flow."""
+    from gdoc.auth import authenticate
+    from gdoc.util import AuthError
+
+    try:
+        authenticate()
+    except AuthError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
 def main():
+    # Handle `gquill auth` before argparse
+    if len(sys.argv) >= 2 and sys.argv[1] == "auth":
+        _run_auth()
+        return
+
     parser = argparse.ArgumentParser(
         description="Real-time meeting transcription → Google Docs",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
+  gquill auth                Authenticate with Google (one-time)
   gquill                     Transcribe + sync to new Google Doc
-  gquill --no-sync           Local-only (same as livekeet)
   gquill --with "Alice"      Label other speaker
   gquill --doc DOC_ID        Append to existing doc
+  gquill --no-sync           Local-only (same as livekeet)
   gquill --mic-only          Microphone only (no system audio)
         """,
     )

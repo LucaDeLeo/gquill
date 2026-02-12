@@ -7,7 +7,6 @@ Each line of transcript appears in a Google Doc within seconds of being spoken. 
 ## Install
 
 ```
-uv tool install git+https://github.com/LucaDeLeo/gdoc.git
 uv tool install git+https://github.com/LucaDeLeo/gquill.git
 ```
 
@@ -16,10 +15,10 @@ uv tool install git+https://github.com/LucaDeLeo/gquill.git
 ### Google Auth (one-time)
 
 ```
-gdoc auth
+gquill auth
 ```
 
-This requires the [gdoc](https://github.com/LucaDeLeo/gdoc) CLI (installed above). It opens a browser for Google OAuth and saves a token to `~/.gdoc/token.json`. All docs are created under whichever Google account you sign in with. To switch accounts, run `gdoc auth` again.
+This opens a browser for Google OAuth and saves a token to `~/.gdoc/token.json`. All docs are created under whichever Google account you sign in with. To switch accounts, run `gquill auth` again.
 
 ### Parakeet Model
 
@@ -28,6 +27,7 @@ Downloads automatically on first run (~600MB, cached for subsequent runs).
 ## Usage
 
 ```
+gquill auth                     # authenticate with Google (one-time)
 gquill                          # transcribe + sync to a new Google Doc
 gquill --with "Alice"           # label the other speaker
 gquill --doc DOC_ID_OR_URL      # append to an existing doc
@@ -42,7 +42,7 @@ Press `Ctrl+C` to stop. The local transcript and Google Doc both get a timestamp
 ## How it works
 
 1. Parse args, load livekeet config
-2. Validate Google auth (exits with error if not authenticated — use `--no-sync` for local-only)
+2. Validate Google auth (exits with error if not authenticated — run `gquill auth` or use `--no-sync` for local-only)
 3. Create a new Google Doc (or open existing via `--doc`) and print the URL
 4. Start a background sync thread that consumes a queue of transcript lines
 5. Start transcribing — audio is captured, run through VAD, and transcribed on-device
