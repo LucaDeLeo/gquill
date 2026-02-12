@@ -30,9 +30,9 @@ def _setup_doc(args, config) -> tuple[str | None, str | None, int]:
     try:
         get_credentials()
     except AuthError:
-        print("Warning: Not authenticated with Google. Run `gdoc auth`.")
-        print("Continuing with local-only transcription.\n")
-        return None, None, 0
+        print("Error: Not authenticated with Google. Run `gdoc auth` first.")
+        print("Or use --no-sync for local-only transcription.")
+        sys.exit(1)
 
     if args.doc:
         # Append to existing document
@@ -213,9 +213,12 @@ Examples:
             if doc_id:
                 from gquill.doc_sync import DocSync
                 doc_sync = DocSync(doc_id, end_index)
+        except SystemExit:
+            raise
         except Exception as e:
-            print(f"Warning: Could not set up Google Doc sync: {e}")
-            print("Continuing with local-only transcription.\n")
+            print(f"Error: Could not set up Google Doc sync: {e}")
+            print("Or use --no-sync for local-only transcription.")
+            sys.exit(1)
 
     # Create and start transcriber
     from gquill.sync_transcriber import SyncTranscriber
