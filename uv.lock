@@ -333,23 +333,12 @@ wheels = [
 [[package]]
 name = "gdoc"
 version = "0.1.0"
-source = { directory = "../gdoc" }
+source = { git = "https://github.com/LucaDeLeo/gdoc.git#663c580288578c39e77e1e5ff4ac42761329c5a6" }
 dependencies = [
     { name = "google-api-python-client" },
     { name = "google-auth-httplib2" },
     { name = "google-auth-oauthlib" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "google-api-python-client", specifier = ">=2.150.0" },
-    { name = "google-auth-httplib2", specifier = ">=0.2.0" },
-    { name = "google-auth-oauthlib", specifier = ">=1.2.1" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.14" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8.0" },
-]
-provides-extras = ["dev"]
 
 [[package]]
 name = "google-api-core"
@@ -446,8 +435,8 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "gdoc", directory = "../gdoc" },
-    { name = "livekeet", directory = "../parakeet" },
+    { name = "gdoc", git = "https://github.com/LucaDeLeo/gdoc.git" },
+    { name = "livekeet", git = "https://github.com/LucaDeLeo/livekeet.git" },
 ]
 
 [[package]]
@@ -608,23 +597,13 @@ wheels = [
 [[package]]
 name = "livekeet"
 version = "0.1.0"
-source = { directory = "../parakeet" }
+source = { git = "https://github.com/LucaDeLeo/livekeet.git#33a5deb575e1b56121aa42ae1ddd8a38d2acf0f9" }
 dependencies = [
     { name = "numpy" },
     { name = "parakeet-mlx" },
     { name = "sounddevice" },
     { name = "webrtcvad-wheels" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "numpy", specifier = "<2.4" },
-    { name = "parakeet-mlx", specifier = ">=0.5.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "sounddevice", specifier = ">=0.5.5" },
-    { name = "webrtcvad-wheels", specifier = ">=2.0.10" },
-]
-provides-extras = ["dev"]
 
 [[package]]
 name = "llvmlite"

@@ -13,5 +13,5 @@ dependencies = ["gdoc", "livekeet"]
 gquill = "gquill.cli:main"
 
 [tool.uv.sources]
-gdoc = { path = "../gdoc" }
-livekeet = { path = "../parakeet" }
+gdoc = { git = "https://github.com/LucaDeLeo/gdoc.git" }
+livekeet = { git = "https://github.com/LucaDeLeo/livekeet.git" }
