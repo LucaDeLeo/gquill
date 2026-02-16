@@ -332,8 +332,8 @@ wheels = [
 
 [[package]]
 name = "gdoc"
-version = "0.1.0"
-source = { git = "https://github.com/LucaDeLeo/gdoc.git#663c580288578c39e77e1e5ff4ac42761329c5a6" }
+version = "0.5.0"
+source = { git = "https://github.com/LucaDeLeo/gdoc.git#6d63663bc9a16b223589476ec8c2299bd38117c0" }
 dependencies = [
     { name = "google-api-python-client" },
     { name = "google-auth-httplib2" },

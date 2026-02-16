@@ -14,6 +14,18 @@ log = logging.getLogger(__name__)
 _SENTINEL = None  # signals the worker to shut down
 
 
+def _inject_tab_id(requests: list[dict], tab_id: str) -> list[dict]:
+    """Inject tabId into all Location and Range objects in Docs API requests."""
+    for req in requests:
+        for value in req.values():
+            if isinstance(value, dict):
+                if "location" in value:
+                    value["location"]["tabId"] = tab_id
+                if "range" in value:
+                    value["range"]["tabId"] = tab_id
+    return requests
+
+
 class DocSync:
     """Queue-based background syncer: transcript lines → Google Docs API.
 
@@ -22,9 +34,10 @@ class DocSync:
     extra GET calls after each insert.
     """
 
-    def __init__(self, doc_id: str, end_index: int):
+    def __init__(self, doc_id: str, end_index: int, *, tab_id: str | None = None):
         self.doc_id = doc_id
         self.end_index = end_index
+        self.tab_id = tab_id
         self._queue: queue.Queue[str | None] = queue.Queue()
         self._consecutive_failures = 0
         self._thread = threading.Thread(target=self._worker, daemon=True)
@@ -68,6 +81,9 @@ class DocSync:
         if not requests:
             return
 
+        if self.tab_id:
+            _inject_tab_id(requests, self.tab_id)
+
         service = get_docs_service()
         service.documents().batchUpdate(
             documentId=self.doc_id,
@@ -80,12 +96,28 @@ class DocSync:
         """Re-read the document to correct end_index after failures."""
         try:
             service = get_docs_service()
-            doc = service.documents().get(documentId=self.doc_id).execute()
-            body = doc.get("body", {})
-            content = body.get("content", [])
+            if self.tab_id:
+                from gdoc.api.docs import flatten_tabs
+
+                doc = service.documents().get(
+                    documentId=self.doc_id, includeTabsContent=True,
+                ).execute()
+                tabs = flatten_tabs(doc.get("tabs", []))
+                tab = next(
+                    (t for t in tabs if t["id"] == self.tab_id), None,
+                )
+                if tab:
+                    content = tab["body"].get("content", [])
+                else:
+                    content = []
+            else:
+                doc = service.documents().get(
+                    documentId=self.doc_id,
+                ).execute()
+                content = doc.get("body", {}).get("content", [])
+
             if content:
-                last = content[-1]
-                self.end_index = last.get("endIndex", 1)
+                self.end_index = content[-1].get("endIndex", 1)
             else:
                 self.end_index = 1
             self._consecutive_failures = 0

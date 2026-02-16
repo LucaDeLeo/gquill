@@ -17,12 +17,13 @@ from livekeet import (
 log = logging.getLogger(__name__)
 
 
-def _setup_doc(args, config) -> tuple[str | None, str | None, int]:
-    """Create or open a Google Doc. Returns (doc_id, url, end_index).
+def _setup_doc(args, config) -> tuple[str | None, str | None, int, str | None]:
+    """Create or open a Google Doc. Returns (doc_id, url, end_index, tab_id).
 
-    Returns (None, None, 0) if sync should be disabled.
+    Returns (None, None, 0, None) if sync should be disabled.
+    tab_id is set when using --doc (transcript goes into a "Transcript" tab).
     """
-    from gdoc.api.docs import get_docs_service
+    from gdoc.api.docs import flatten_tabs, get_docs_service
     from gdoc.api.drive import create_doc
     from gdoc.auth import get_credentials
     from gdoc.util import AuthError, extract_doc_id
@@ -35,31 +36,76 @@ def _setup_doc(args, config) -> tuple[str | None, str | None, int]:
         sys.exit(1)
 
     if args.doc:
-        # Append to existing document
+        # Append to existing document — use a "Transcript" tab
         doc_id = extract_doc_id(args.doc)
         service = get_docs_service()
-        doc = service.documents().get(documentId=doc_id).execute()
+        doc = service.documents().get(
+            documentId=doc_id, includeTabsContent=True,
+        ).execute()
         title = doc.get("title", doc_id)
         url = f"https://docs.google.com/document/d/{doc_id}/edit"
 
-        # Find current end index
-        body = doc.get("body", {})
-        content = body.get("content", [])
-        end_index = content[-1].get("endIndex", 1) if content else 1
+        # Check for an existing "Transcript" tab
+        tabs = flatten_tabs(doc.get("tabs", []))
+        transcript_tab = next(
+            (t for t in tabs if t["title"] == "Transcript"), None,
+        )
 
-        # Insert a separator + session heading
         heading = f"\n---\n\n## Session — {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-        service.documents().batchUpdate(
-            documentId=doc_id,
-            body={"requests": [
-                {"insertText": {"location": {"index": end_index - 1}, "text": heading}},
-            ]},
-        ).execute()
-        end_index += len(heading) - 1
+
+        if transcript_tab is None:
+            # Create a new "Transcript" tab
+            service.documents().batchUpdate(
+                documentId=doc_id,
+                body={"requests": [
+                    {"addDocumentTab": {"tabProperties": {"title": "Transcript"}}},
+                ]},
+            ).execute()
+
+            # Re-fetch to get the new tab's ID and body
+            doc = service.documents().get(
+                documentId=doc_id, includeTabsContent=True,
+            ).execute()
+            tabs = flatten_tabs(doc.get("tabs", []))
+            transcript_tab = next(
+                t for t in tabs if t["title"] == "Transcript"
+            )
+            tab_id = transcript_tab["id"]
+
+            # Insert session heading into the new tab at index 1
+            session_heading = f"## Session — {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            service.documents().batchUpdate(
+                documentId=doc_id,
+                body={"requests": [
+                    {"insertText": {
+                        "location": {"index": 1, "tabId": tab_id},
+                        "text": session_heading,
+                    }},
+                ]},
+            ).execute()
+            end_index = 1 + len(session_heading)
+        else:
+            # Reuse existing "Transcript" tab
+            tab_id = transcript_tab["id"]
+            body = transcript_tab.get("body", {})
+            content = body.get("content", [])
+            end_index = content[-1].get("endIndex", 1) if content else 1
+
+            # Insert separator + session heading
+            service.documents().batchUpdate(
+                documentId=doc_id,
+                body={"requests": [
+                    {"insertText": {
+                        "location": {"index": end_index - 1, "tabId": tab_id},
+                        "text": heading,
+                    }},
+                ]},
+            ).execute()
+            end_index += len(heading) - 1
 
         print(f"Appending to: {title}")
         print(f"  {url}\n")
-        return doc_id, url, end_index
+        return doc_id, url, end_index, tab_id
 
     # Create a new document
     title = f"Meeting — {datetime.now().strftime('%Y-%m-%d %H:%M')}"
@@ -101,7 +147,7 @@ def _setup_doc(args, config) -> tuple[str | None, str | None, int]:
     end_index = 1 + len(heading)
     print(f"Created: {title}")
     print(f"  {url}\n")
-    return doc_id, url, end_index
+    return doc_id, url, end_index, None
 
 
 def _run_auth():
@@ -243,10 +289,10 @@ Examples:
     doc_sync = None
     if not args.no_sync:
         try:
-            doc_id, url, end_index = _setup_doc(args, config)
+            doc_id, url, end_index, tab_id = _setup_doc(args, config)
             if doc_id:
                 from gquill.doc_sync import DocSync
-                doc_sync = DocSync(doc_id, end_index)
+                doc_sync = DocSync(doc_id, end_index, tab_id=tab_id)
         except SystemExit:
             raise
         except Exception as e:

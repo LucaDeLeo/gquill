@@ -30,7 +30,7 @@ Downloads automatically on first run (~600MB, cached for subsequent runs).
 gquill auth                     # authenticate with Google (one-time)
 gquill                          # transcribe + sync to a new Google Doc
 gquill --with "Alice"           # label the other speaker
-gquill --doc DOC_ID_OR_URL      # append to an existing doc
+gquill --doc DOC_ID_OR_URL      # append to existing doc (uses a "Transcript" tab)
 gquill --mic-only               # microphone only (no system audio)
 gquill --no-sync                # local-only, no Google Doc
 gquill --multilingual           # use multilingual model (v3)
@@ -43,7 +43,7 @@ Press `Ctrl+C` to stop. The local transcript and Google Doc both get a timestamp
 
 1. Parse args, load livekeet config
 2. Validate Google auth (exits with error if not authenticated — run `gquill auth` or use `--no-sync` for local-only)
-3. Create a new Google Doc (or open existing via `--doc`) and print the URL
+3. Create a new Google Doc (or open existing via `--doc`) and print the URL. When using `--doc`, a "Transcript" tab is created (or reused) so meeting notes stay separate from the transcript.
 4. Start a background sync thread that consumes a queue of transcript lines
 5. Start transcribing — audio is captured, run through VAD, and transcribed on-device
 6. Each transcript line is written to the local file first, then enqueued for Google Doc sync
