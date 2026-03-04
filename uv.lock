@@ -831,7 +831,7 @@ wheels = [
 
 [[package]]
 name = "gquill"
-version = "0.2.3"
+version = "0.2.4"
 source = { editable = "." }
 dependencies = [
     { name = "gdoc" },
@@ -1219,8 +1219,8 @@ wheels = [
 
 [[package]]
 name = "livekeet"
-version = "0.1.15"
-source = { git = "https://github.com/LucaDeLeo/livekeet.git#61a7d4b684cfd9b500fa5704f90d04f1da80f352" }
+version = "0.1.16"
+source = { git = "https://github.com/LucaDeLeo/livekeet.git#5e8c821fa45b99b3e6929a808a1ad559a1b52d04" }
 dependencies = [
     { name = "numpy" },
     { name = "parakeet-mlx" },
