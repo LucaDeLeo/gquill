@@ -181,7 +181,7 @@ Examples:
   gquill auth                Authenticate with Google (one-time)
   gquill                     Transcribe + sync to new Google Doc
   gquill --with "Alice"      Label other speaker
-  gquill --doc DOC_ID        Append to existing doc
+  gquill --doc "URL"         Append to existing doc (quote URLs!)
   gquill --no-sync           Local-only (same as livekeet)
   gquill --mic-only          Microphone only (no system audio)
   gquill update              Update to latest version
@@ -238,7 +238,7 @@ Examples:
     parser.add_argument(
         "--doc",
         metavar="DOC_ID",
-        help="Append to an existing Google Doc (ID or URL)",
+        help="Append to an existing Google Doc (ID or URL — quote URLs in shell)",
     )
     parser.add_argument(
         "--folder",
